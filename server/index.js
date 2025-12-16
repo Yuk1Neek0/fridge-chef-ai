@@ -38,14 +38,29 @@ app.post('/api/identify-ingredients', async (req, res) => {
     const { imageData, imageType } = req.body;
 
     // Validate input
-    if (!imageData || !imageType) {
+    if (!imageData) {
       return res.status(400).json({
-        error: 'Missing required fields: imageData and imageType'
+        error: 'Missing required field: imageData'
       });
     }
 
-    // Remove data URL prefix if present
-    const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+    // Extract media type from data URL or use provided imageType
+    let mediaType = imageType;
+    let base64Data = imageData;
+
+    // Check if imageData contains data URL prefix
+    const dataUrlMatch = imageData.match(/^data:(image\/\w+);base64,(.+)$/);
+    if (dataUrlMatch) {
+      mediaType = dataUrlMatch[1]; // Extract actual media type (e.g., 'image/png')
+      base64Data = dataUrlMatch[2]; // Extract base64 data
+    } else {
+      // Remove any remaining prefix
+      base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+      // If no media type provided, default to jpeg
+      if (!mediaType) {
+        mediaType = 'image/jpeg';
+      }
+    }
 
     // Create message with vision capability
     const message = await anthropic.messages.create({
@@ -59,7 +74,7 @@ app.post('/api/identify-ingredients', async (req, res) => {
               type: 'image',
               source: {
                 type: 'base64',
-                media_type: imageType,
+                media_type: mediaType,
                 data: base64Data,
               },
             },
