@@ -28,6 +28,48 @@ const UploadPage = () => {
     setDetectedIngredients([]);
   };
 
+  const handleMultipleImagesSelect = async (imagesArray) => {
+    // Show the first image as preview
+    setImagePreview(imagesArray[0].data);
+    setError(null);
+    setDetectedIngredients([]);
+
+    // Auto-analyze all images
+    setIsAnalyzing(true);
+
+    try {
+      const allIngredients = [];
+
+      for (let i = 0; i < imagesArray.length; i++) {
+        const { data, type } = imagesArray[i];
+        try {
+          const ingredients = await identifyIngredients(data, type);
+          allIngredients.push(...ingredients);
+        } catch (err) {
+          console.error(`Error analyzing image ${i + 1}:`, err);
+        }
+      }
+
+      // Remove duplicates based on ingredient name (case-insensitive)
+      const uniqueIngredients = allIngredients.filter((ingredient, index, self) =>
+        index === self.findIndex((t) => (
+          t.name.toLowerCase() === ingredient.name.toLowerCase()
+        ))
+      );
+
+      setDetectedIngredients(uniqueIngredients);
+
+      if (uniqueIngredients.length === 0) {
+        setError('No ingredients detected in the images. Please try different photos.');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Analysis error:', err);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   const handleAnalyze = async () => {
     if (!imagePreview) {
       setError('Please upload an image first');
@@ -66,7 +108,11 @@ const UploadPage = () => {
       </div>
 
       <div className="upload-container">
-        <ImageUploader onImageSelect={handleImageSelect} preview={imagePreview} />
+        <ImageUploader
+          onImageSelect={handleImageSelect}
+          onMultipleImagesSelect={handleMultipleImagesSelect}
+          preview={imagePreview}
+        />
 
         {imagePreview && !isAnalyzing && detectedIngredients.length === 0 && (
           <button className="btn-primary btn-analyze" onClick={handleAnalyze}>
