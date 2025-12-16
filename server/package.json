@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
+    "@huggingface/inference": "^2.8.1",
     "express": "^4.21.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7"
