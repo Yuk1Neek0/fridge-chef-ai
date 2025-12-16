@@ -274,12 +274,16 @@ button {
 }
 
 .hero-section {
-  background:
-    linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%),
+  /* Fallback solid color */
+  background-color: #10b981;
+  /* Pattern background with semi-transparent overlay */
+  background-image:
+    linear-gradient(135deg, rgba(16, 185, 129, 0.7) 0%, rgba(5, 150, 105, 0.7) 100%),
     url('/images/backgroundimg.png');
   background-size: cover;
-  background-position: center;
+  background-position: center center;
   background-repeat: no-repeat;
+  background-attachment: scroll;
   color: white;
   padding: var(--spacing-2xl) var(--spacing-md);
   text-align: center;
